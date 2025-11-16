@@ -1,0 +1,8 @@
+**/__pycache__/
+output_csv/users_active.csv
+output_csv/coleiras_vinculadas.csv
+output_csv/coleiras_reportando.csv
+output_csv/animals.csv
+.env
+utils/*
+main.py
