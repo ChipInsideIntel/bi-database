@@ -54,6 +54,7 @@ def main():
         "user_activities",
         "users",
         "farm_user",
+        "company_user",
         # Additional tables for farm_states query
         "farm_addresses",
         "cities",
@@ -81,6 +82,7 @@ def main():
     df_animals = queries.build_animals()
     df_users_active = queries.build_users_active()
     df_farm_states = queries.build_farm_states()
+    df_users = queries.build_users()
 
 
     logger.info("All query DataFrames built successfully")
@@ -138,6 +140,7 @@ def main():
         "users_active": (df_users_active, 'users_active'),
         "farm_states": (df_farm_states, 'farm_states'),
         "contagem_acessos": (df_contagem_acessos_t, 'contagem_acessos_por_usuario'),
+        "users": (df_users, 'users')
     }
 
     for page, (df_page, file_name) in outputs.items():

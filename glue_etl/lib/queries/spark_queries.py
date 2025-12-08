@@ -290,3 +290,39 @@ class SparkQueries:
 
         logger.info("Finished building Farm States DataFrame")
         return result
+
+    def build_users(self) -> DataFrame:
+        """
+        Recreates users query logic:
+        Query 6: Users - User information with farm and company associations
+        """
+        logger.info("Starting Users DataFrame")
+
+        u = self.dfs["users"].alias("u")
+        fu = self.dfs["farm_user"].alias("fu")
+        cu = self.dfs["company_user"].alias("cu")
+
+        # DISTINCT ON (u.id) replacement using Window function
+        # Join users with farm_user and company_user
+        result_with_duplicates = u \
+            .join(fu, F.col("fu.user_id") == F.col("u.id"), how="left") \
+            .join(cu, F.col("cu.user_id") == F.col("u.id"), how="left") \
+            .filter(F.col("u.deleted_at").isNull())
+
+        # Use Window function to get distinct users (first row per user_id)
+        w_user = Window.partitionBy("u.id").orderBy(F.col("u.id"))
+        
+        result = result_with_duplicates \
+            .withColumn("rn", F.row_number().over(w_user)) \
+            .filter(F.col("rn") == 1) \
+            .select(
+                F.col("u.id").alias("user_id"),
+                F.col("u.name"),
+                F.col("fu.farm_id"),
+                F.col("fu.through_system"),
+                F.col("fu.active"),
+                F.col("cu.company_id")
+            )
+
+        logger.info("Finished building Users DataFrame")
+        return result
