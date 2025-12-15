@@ -55,7 +55,6 @@ def main():
         "users",
         "farm_user",
         "company_user",
-        # Additional tables for farm_states query
         "farm_addresses",
         "cities",
         "states",
@@ -64,7 +63,8 @@ def main():
         "companies",
         "company_portfolio_farm",
         "company_portfolios",
-        "collar_farm"
+        "collar_farm",
+        "c_envs"
     ]
 
     logger.info("Loading base tables from Glue Catalog")
@@ -83,6 +83,7 @@ def main():
     df_users_active = queries.build_users_active()
     df_farm_states = queries.build_farm_states()
     df_users = queries.build_users()
+    df_c_env_list = queries.build_c_env_list()
 
 
     logger.info("All query DataFrames built successfully")
@@ -140,7 +141,8 @@ def main():
         "users_active": (df_users_active, 'users_active'),
         "farm_states": (df_farm_states, 'farm_states'),
         "contagem_acessos": (df_contagem_acessos_t, 'contagem_acessos_por_usuario'),
-        "users": (df_users, 'users')
+        "users": (df_users, 'users'),
+        "c_env_list": (df_c_env_list, 'c_env_list')
     }
 
     for page, (df_page, file_name) in outputs.items():

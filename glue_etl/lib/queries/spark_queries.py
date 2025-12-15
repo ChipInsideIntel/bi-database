@@ -326,3 +326,25 @@ class SparkQueries:
 
         logger.info("Finished building Users DataFrame")
         return result
+
+    def build_c_env_list(self) -> DataFrame:
+        """
+        Recreates c_env_list query logic:
+        Query 7: C-Env List - C-Env information with farm associations
+        """
+        logger.info("Starting C-Env List DataFrame")
+
+        ce = self.dfs["c_envs"].alias("ce")
+        f = self.dfs["farms"].alias("f")
+
+        # Main query
+        result = ce.join(f, F.col("f.id") == F.col("ce.farm_id")) \
+            .select(
+                F.col("f.code").alias("farm_code"),
+                F.col("f.id").alias("farm_id"),
+                F.col("ce.id").alias("ce_id")
+            ) \
+            .orderBy(F.col("f.code").asc())
+
+        logger.info("Finished building C-Env List DataFrame")
+        return result
