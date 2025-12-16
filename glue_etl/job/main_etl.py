@@ -98,11 +98,11 @@ def main():
     coleiras_vinculadas_transformer = ColeirasVinculadasTransformerSpark(spark)
     contagem_acessos_transformer = ContagemAcessosPorUsuarioTransformerSpark(spark)
 
-    df_animals_t = animals_transformer.transform_animals(df_animals)
-    df_coleiras_reportando_t = coleiras_reportando_transformer.transform_coleiras_reportando(df_coleiras_reportando)
-    df_coleiras_vinculadas_t = coleiras_vinculadas_transformer.transform_coleiras_vinculadas(df_coleiras_vinculadas)
-    df_contagem_acessos_t = contagem_acessos_transformer.transform_contagem_acessos(df_users_active, df_farm_states)
-    logger.info("All transformations applied successfully")
+    df_animals_t = animals_transformer.transform_animals(df_animals).cache()
+    df_coleiras_reportando_t = coleiras_reportando_transformer.transform_coleiras_reportando(df_coleiras_reportando).cache()
+    df_coleiras_vinculadas_t = coleiras_vinculadas_transformer.transform_coleiras_vinculadas(df_coleiras_vinculadas).cache()
+    df_contagem_acessos_t = contagem_acessos_transformer.transform_contagem_acessos(df_users_active, df_farm_states).cache()
+    logger.info("All transformations applied successfully and cached")
 
     # -----------------------------------------
     # Write outputs (parquet + single CSV per page)
@@ -155,6 +155,10 @@ def main():
 
         logger.info(f"Writing {page} csv to {csv_path}")
         loader.write_csv_singlefile(df_page, csv_path, file_name)
+        
+        # Release cache after writing both formats
+        df_page.unpersist()
+        logger.info(f"Cache released for {page}")
 
     logger.info("ETL job finished successfully ✅")
     logger.info(f"End time: {datetime.now()}")

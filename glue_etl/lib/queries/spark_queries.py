@@ -174,7 +174,7 @@ class SparkQueries:
             .join(fu, (F.col("fu.user_id") == F.col("u.id")) & (F.col("fu.farm_id") == F.col("f.id"))) \
             .filter(F.col("ua.timestamp").cast("timestamp") >= F.lit("2025-01-01 00:00:00").cast("timestamp")) \
             .select(
-                F.col("ua.timestamp").cast("timestamp").alias("acesso_timestamp"),
+                (F.col("ua.timestamp").cast("timestamp") - F.expr("INTERVAL 3 HOURS")).alias("acesso_timestamp"),
                 F.col("ua.user_id"),
                 F.col("f.code").alias("farm_code"),
                 F.col("ua.page"),
