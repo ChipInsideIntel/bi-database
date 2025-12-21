@@ -16,6 +16,9 @@ from lib.transformers.pyspark_transformers import (
 from lib.loaders.s3_loader import S3Loader
 from lib.utils.logger import Logger
 
+import boto3
+import json
+
 def main():
     # -----------------------------------------
     # Glue job init
@@ -76,7 +79,7 @@ def main():
     queries = SparkQueries(spark, dfs)
 
     logger.info("Building query DataFrames")
-
+    
     df_coleiras_reportando = queries.build_coleiras_reportando()
     df_coleiras_vinculadas = queries.build_coleiras_vinculadas()
     df_animals = queries.build_animals()
@@ -109,30 +112,6 @@ def main():
     # -----------------------------------------
     loader = S3Loader(spark)
 
-    """
-    bloco para escrever os datasets transformados de teste no s3
-
-    try:
-        logger.info("Writing alerts transform parquet")
-        df_alertas_t = loader.write_parquet(df_alertas_t, parquet_path, final_name="alertas_transformed_teste")
-        logger.info("Alerts parquet written successfully")
-
-        logger.info("Writing validador transform parquet")
-        df_validador_t = loader.write_parquet(df_validador_t, parquet_path, final_name="validador_transformed_teste")
-        logger.info("Validador parquet written successfully")
-
-        logger.info("Writing concepcao transform parquet")
-        df_concepcao_t = loader.write_parquet(df_concepcao_t, parquet_path, final_name="concepcao_transformed_teste")
-        logger.info("Concepcao parquet written successfully")
-
-        logger.info("Writing protocol alerts transform parquet")
-        df_protocols = loader.write_parquet(df_protocols, parquet_path, final_name="protocol_alerts_transformed_teste")
-        logger.info("Protocol alerts parquet written successfully")
-
-    except Exception as e:
-        logger.error(f"Error writing alertas parquet: {e}")
-    """
-
     
     outputs = {
        "coleiras_reportando": (df_coleiras_reportando_t, 'page_coleiras_reportando'),
@@ -159,9 +138,21 @@ def main():
         # Release cache after writing both formats
         df_page.unpersist()
         logger.info(f"Cache released for {page}")
-
+    
     logger.info("ETL job finished successfully ✅")
     logger.info(f"End time: {datetime.now()}")
+
+    logger.info("Invoking SharePoint load Lambda function")
+
+    lambda_client = boto3.client('lambda')
+
+    response = lambda_client.invoke(
+        FunctionName='glue-sharepoint-load',
+        Payload=json.dumps({"etl_name": "bi-database"})
+    )
+
+    logger.info(f"Lambda invocation response: {response}")
+
 
     job.commit()
 
