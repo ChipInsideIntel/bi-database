@@ -170,7 +170,7 @@ class SparkQueries:
 
         # Main query
         result = ua.join(u, F.col("u.id") == F.col("ua.user_id")) \
-            .join(f, F.col("f.id") == F.col("ua.farm_id")) \
+            .join(f, F.col("f.id") == F.col("ua.context_id")) \
             .join(fu, (F.col("fu.user_id") == F.col("u.id")) & (F.col("fu.farm_id") == F.col("f.id"))) \
             .filter(F.col("ua.timestamp").cast("timestamp") >= F.lit("2025-01-01 00:00:00").cast("timestamp")) \
             .select(
@@ -178,6 +178,8 @@ class SparkQueries:
                 F.col("ua.user_id"),
                 F.col("f.code").alias("farm_code"),
                 F.col("ua.page"),
+                F.col("ua.source"),
+                F.col("ua.context_type"),
                 F.date_format(F.current_date(), "yyyy-MM-dd").alias("extraction_date")
             )
 
