@@ -6,3 +6,6 @@ output_csv/animals.csv
 .env
 utils/*
 main.py
+page_counts.csv
+users_active.csv
+analyze_pages.py

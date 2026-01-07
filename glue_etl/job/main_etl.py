@@ -12,6 +12,7 @@ from lib.transformers.pyspark_transformers import (
     ColeirasReportandoTransformerSpark,
     ColeirasVinculadasTransformerSpark,
     ContagemAcessosPorUsuarioTransformerSpark,
+    UsersActiveTransformerSpark,
 )
 from lib.loaders.s3_loader import S3Loader
 from lib.utils.logger import Logger
@@ -100,11 +101,13 @@ def main():
     coleiras_reportando_transformer = ColeirasReportandoTransformerSpark(spark)
     coleiras_vinculadas_transformer = ColeirasVinculadasTransformerSpark(spark)
     contagem_acessos_transformer = ContagemAcessosPorUsuarioTransformerSpark(spark)
+    users_active_transformer = UsersActiveTransformerSpark(spark)
 
     df_animals_t = animals_transformer.transform_animals(df_animals).cache()
     df_coleiras_reportando_t = coleiras_reportando_transformer.transform_coleiras_reportando(df_coleiras_reportando).cache()
     df_coleiras_vinculadas_t = coleiras_vinculadas_transformer.transform_coleiras_vinculadas(df_coleiras_vinculadas).cache()
     df_contagem_acessos_t = contagem_acessos_transformer.transform_contagem_acessos(df_users_active, df_farm_states).cache()
+    df_users_active_t = users_active_transformer.transform_users_active(df_users_active).cache()
     logger.info("All transformations applied successfully and cached")
 
     # -----------------------------------------
@@ -117,7 +120,7 @@ def main():
        "coleiras_reportando": (df_coleiras_reportando_t, 'page_coleiras_reportando'),
         "coleiras_vinculadas": (df_coleiras_vinculadas_t, 'page_coleiras_vinculadas'),
         "animals": (df_animals_t, 'page_animals'),
-        "users_active": (df_users_active, 'users_active'),
+        "users_active": (df_users_active_t, 'users_active'),
         "farm_states": (df_farm_states, 'farm_states'),
         "contagem_acessos": (df_contagem_acessos_t, 'contagem_acessos_por_usuario'),
         "users": (df_users, 'users'),
