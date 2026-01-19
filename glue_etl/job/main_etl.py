@@ -151,6 +151,7 @@ def main():
 
     response = lambda_client.invoke(
         FunctionName='glue-sharepoint-load',
+        InvocationType='Event',
         Payload=json.dumps({"etl_name": "bi-database"})
     )
 
